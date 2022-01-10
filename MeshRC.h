@@ -7,7 +7,7 @@
 #include <espnow.h>
 
 namespace MeshRC {
-#define MESH_RC_DEBUG_ALL_MSG false
+//#define MESH_RC_DEBUG_ALL_MSG false
 
 typedef std::function<void(void)> esp_rc_callback_t;
 typedef std::function<void(u8 *, u8)> esp_rc_data_callback_t;
@@ -44,8 +44,10 @@ void send(u8 *data, u8 size) {
 }
 void send(String data) {
 	send((u8 *)data.c_str(), data.length());
-	Serial.printf(data.c_str());
+#ifdef MESH_RC_DEBUG_ALL_MSG
+  Serial.printf(data.c_str());
 	Serial.printf("\n");
+#endif
 }
 void log(String data, String message) {
 	
@@ -90,13 +92,13 @@ bool equals(u8 *a, u8 *b, u8 size, u8 offset = 0) {
 esp_now_send_cb_t sendHandler = [](u8 *addr, u8 err) {
 	sending = false;
 	duration = micros() - sendTime;
-
+#ifdef MESH_RC_DEBUG_ALL_MSG
   Serial.printf(" [ ");
   for (auto i = 0; i < 5; i++) {
     Serial.printf("%02X ", addr[i]);
   }
   Serial.printf("] status=%i \n",err);
-
+#endif
 };
 esp_now_recv_cb_t recvHandler = [](u8 *addr, u8 *data, u8 size) {
 	static u8 offset, i;

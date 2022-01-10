@@ -5,7 +5,7 @@
 
 #include <ESP8266WiFi.h>
 #define CHANNEL 9
-#define DEBUG_ALL false
+//#define DEBUG_ALL false
 #define FORSEDEEPSLEEP 25000
 const int buttonPin = 2;     // the number of the pushbutton pin
 
@@ -50,8 +50,9 @@ void setup() {
   Serial.printf("WiFi.begin time = %u \n",delta1);
   Serial.printf("WiFi.disconnect time = %u \n",delta2);
 #endif
-  Serial.print("WiFi.macAddress=");
+  Serial.print("\n\nWiFi.macAddress=");
   Serial.println(WiFi.macAddress());
+  Serial.flush();
   
   // initialize the pushbutton pin as an input:
   pinMode(buttonPin, INPUT);
