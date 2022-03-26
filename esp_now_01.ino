@@ -17,6 +17,7 @@ int buttonState = 0;         // variable for reading the pushbutton statu
 int prevButtonState = 4711;
 unsigned long lastUpdate = millis();
 unsigned long currentMillis,delta1,delta2;
+String mac;
 void setup() {
   WiFi.persistent(false);//don't store and read Wifi settings, this savesabout 300ms
   Serial.begin(115200);
@@ -50,8 +51,9 @@ void setup() {
   Serial.printf("WiFi.begin time = %u \n",delta1);
   Serial.printf("WiFi.disconnect time = %u \n",delta2);
 #endif
+  mac = WiFi.macAddress();
   Serial.print("\n\nWiFi.macAddress=");
-  Serial.println(WiFi.macAddress());
+  Serial.println(mac);
   Serial.flush();
   
   // initialize the pushbutton pin as an input:
@@ -60,11 +62,9 @@ void setup() {
 //Channel must be the same for receiver and sender
 //it should be the same as youre WiFi-network if reciver
 //the receiver shall forvard to HA
-  MeshRC::begin(CHANNEL);
-
-  MeshRC::send("Remote esp started "+WiFi.macAddress());
-  String s = String(batterylevel);
-  MeshRC::send("Voltage: "+ s);
+  MeshRC::begin(0);
+ 
+  MeshRC::send("ESP01 "+mac+" Started Vcc "+(String)( batterylevel / 1000.0)+" volts");
 }    
 
 
@@ -77,24 +77,25 @@ void loop() {
   if (prevButtonState != buttonState) {
     prevButtonState = buttonState;
     if (buttonState == HIGH) {
-      MeshRC::send("Button activeted at ");
+      MeshRC::send("ESP01 "+mac+" Button activeted");
     } else {
-      MeshRC::send("Button deactiveted at ");
+      MeshRC::send("ESP01 "+mac+" Button deactiveted");
     }
+      MeshRC::send("ESP01 "+mac+" WiFi.rssi "+ (String)(WiFi.RSSI()));   
   }
   
   if ( currentMillis > (lastUpdate + 5000) ){
-    MeshRC::send("still running " + String(currentMillis));
+    MeshRC::send("ESP01 "+mac+" still running " + String(currentMillis));
     lastUpdate = currentMillis;
     batterylevel = ESP.getVcc(); 
-    MeshRC::send("Voltage: "+ String(batterylevel));
+    MeshRC::send("ESP01 "+mac+" Voltage: "+ String(batterylevel/ 1000.0));
   }
   
   if ( currentMillis > FORSEDEEPSLEEP ){
     batterylevel = ESP.getVcc(); 
-    String s = String(batterylevel);
-    MeshRC::send("Voltage: "+ s);
-    MeshRC::send("Going to sleep ");
+    String s = String(batterylevel/ 1000.0);
+    MeshRC::send("ESP01 "+mac+" Voltage: "+ s);
+    MeshRC::send("ESP01 "+mac+" Going to sleep ");
     ESP.deepSleep(0);
   }
 }
